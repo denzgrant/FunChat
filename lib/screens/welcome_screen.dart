@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:funchat/components/RoundButton.dart';
 import 'package:funchat/screens/login_screen.dart';
 import 'package:funchat/screens/registration_screen.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+
+import '../constants.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -10,11 +15,37 @@ class WelcomeScreen extends StatefulWidget {
   _WelcomeScreenState createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
+  AnimationController controller;
+  Animation animation;
+  @override
+  //calls when screen is created
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    controller =
+        AnimationController(duration: Duration(seconds: 1), vsync: this);
+
+    animation = ColorTween(begin: Colors.lightBlueAccent, end: Colors.white)
+        .animate(controller);
+    controller.forward();
+    controller.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: animation.value,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 25.0),
         child: Column(
@@ -23,67 +54,49 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Text(
-                  'FunChat',
-                  style: TextStyle(
-                    fontSize: 45.0,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black54,
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: SizedBox(
+                    child: DefaultTextStyle(
+                      style: const TextStyle(
+                        fontSize: 45.0,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.black54,
+                      ),
+                      child: AnimatedTextKit(
+                        animatedTexts: [
+                          TypewriterAnimatedText('FunChat'),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 Hero(
                   tag: 'logo',
                   child: Container(
-                    child: Align(
-                      alignment: Alignment(0.2, 0.6),
-                      child: Image.asset(
-                        'images/logo.png',
-                        height: 60.0,
-                      ),
+                    child: Image.asset(
+                      'images/logo.png',
+                      height: 60,
                     ),
                   ),
                 ),
               ],
             ),
             SizedBox(
-              height: 48.0,
+              height: 20.0,
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 14.0),
-              child: Material(
-                elevation: 5.0,
-                color: Color(0xffFF709F),
-                borderRadius: BorderRadius.circular(30.0),
-                child: MaterialButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, LoginScreen.id);
-                  },
-                  minWidth: 200.0,
-                  height: 42.0,
-                  child: Text(
-                    'Log In',
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Material(
-                color: Color(0xff00C3FF),
-                borderRadius: BorderRadius.circular(30.0),
-                elevation: 5.0,
-                child: MaterialButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, RegistrationScreen.id);
-                  },
-                  minWidth: 200.0,
-                  height: 42.0,
-                  child: Text(
-                    'Register',
-                  ),
-                ),
-              ),
-            ),
+            RoundButton(
+                title: 'Login',
+                color: appPink,
+                onPressed: () {
+                  Navigator.pushNamed(context, LoginScreen.id);
+                }),
+            RoundButton(
+                title: 'Register',
+                color: appBlue,
+                onPressed: () {
+                  Navigator.pushNamed(context, RegistrationScreen.id);
+                }),
           ],
         ),
       ),

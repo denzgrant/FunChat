@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "721403066483",
+    "project_id": "funchat-609ee",
+    "storage_bucket": "funchat-609ee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721403066483:android:8942ee35601e217a935206",
+        "android_client_info": {
+          "package_name": "com.denzgrant.funchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "721403066483-evc26dtbtte08o7fuveoja60tohijokp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7YCZTHDDqcDp6jfUEp6ncvSXI9TDZz8g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "721403066483-evc26dtbtte08o7fuveoja60tohijokp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
