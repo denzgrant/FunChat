@@ -64,8 +64,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         color: Colors.black54,
                       ),
                       child: AnimatedTextKit(
+                        isRepeatingAnimation: false,
                         animatedTexts: [
-                          TypewriterAnimatedText('FunChat'),
+                          TypewriterAnimatedText(
+                            'FunChat',
+                            speed: Duration(milliseconds: 100),
+                          ),
                         ],
                       ),
                     ),
