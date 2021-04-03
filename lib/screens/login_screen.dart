@@ -34,13 +34,15 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(left: 100.0),
+              Flexible(
                 child: Hero(
                   tag: 'logo',
-                  child: Container(
-                    height: 200.0,
-                    child: Image.asset('images/logo.png'),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 100.0),
+                    child: Container(
+                      height: 200.0,
+                      child: Image.asset('images/logo.png'),
+                    ),
                   ),
                 ),
               ),

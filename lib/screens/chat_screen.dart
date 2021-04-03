@@ -4,18 +4,20 @@ import 'package:funchat/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:funchat/screens/welcome_screen.dart';
 
+final firestore = FirebaseFirestore.instance;
+User loggedInUser;
+
 class ChatScreen extends StatefulWidget {
   //id for route
   static const String id = 'ChatScreen';
-
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
-  User loggedInUser;
+
   String messageText;
 
   @override
@@ -36,16 +38,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // void getMessages() async {
-  //   final messages = await _firestore.collection('messages').get();
-  //   for (var message in messages.docs) {
-  //     print(message.data());
-  //   }
-  // }
-
   void messagesStream() async {
-    //think of streams as a List
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
+    //think of streams as incoming data List
+    await for (var snapshot in firestore.collection('messages').snapshots()) {
       for (var message in snapshot.docs) {
         print(message.data());
       }
@@ -106,32 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection("messages").snapshots(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                List<Text> messageWidgets = [];
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      backgroundColor: appBlue,
-                    ),
-                  );
-                }
-                final messages = snapshot.data.docs;
-                for (var message in messages) {
-                  final messageText = message.data()['text'];
-                  final messageSender = message.data()['sender'];
-                  final messageWidget =
-                      Text('$messageText from $messageSender');
-                  messageWidgets.add(messageWidget);
-                }
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: messageWidgets,
-                );
-              },
-            ),
+            MessageStream(),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -139,6 +109,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: messageTextController,
                       onChanged: (value) {
                         messageText = value;
                       },
@@ -148,10 +119,12 @@ class _ChatScreenState extends State<ChatScreen> {
                   // ignore: deprecated_member_use
                   FlatButton(
                     onPressed: () {
+                      messageTextController.clear();
                       //path has to be same name as collection name
-                      _firestore.collection('messages').add({
+                      firestore.collection('messages').add({
                         'text': messageText,
                         'sender': loggedInUser.email,
+                        "timestamp": Timestamp.now(),
                       });
                     },
                     child: Text(
@@ -166,5 +139,102 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
+  }
+}
+
+class MessageStream extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: firestore
+          .collection("messages")
+          .orderBy('timestamp', descending: true)
+          .snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        List<MessageBubble> messageBubbles = [];
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(
+              backgroundColor: appBlue,
+            ),
+          );
+        }
+        final messages = snapshot.data.docs;
+
+        for (var message in messages) {
+          final messageText = message.data()['text'];
+          final messageSender = message.data()['sender'];
+
+          final currentUser = loggedInUser.email;
+
+          final messageBubble = MessageBubble(
+            sender: messageSender,
+            text: messageText,
+            isMe: currentUser == messageSender,
+          );
+          messageBubbles.add(messageBubble);
+        }
+        return Expanded(
+          child: ListView(
+            reverse: true,
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+            children: messageBubbles,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class MessageBubble extends StatelessWidget {
+  MessageBubble({@required this.sender, @required this.text, this.isMe});
+  final String sender;
+  final String text;
+  final bool isMe;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(
+            sender,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black26,
+            ),
+          ),
+          Material(
+            elevation: 6,
+            borderRadius: isMe
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    bottomLeft: Radius.circular(30.0),
+                    bottomRight: Radius.circular(30.0),
+                  )
+                : BorderRadius.only(
+                    topRight: Radius.circular(30),
+                    bottomRight: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
+                  ),
+            color: isMe ? appBlue : appPink,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+              child: Text(
+                '$text',
+                style: TextStyle(
+                  fontSize: 15.0,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    ;
   }
 }
