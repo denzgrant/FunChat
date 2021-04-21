@@ -21,6 +21,24 @@ class _LoginScreenState extends State<LoginScreen> {
   bool showSpinner = false;
   String email;
   String password;
+  _showDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Oops.... :( "),
+            content: const Text('Sorry, there was an issue logging in'),
+            actions: [
+              TextButton(
+                child: Text('Try Again'),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +110,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         showSpinner = true;
                       });
                     } catch (error) {
-                      print(error);
+                      print("its an $error");
+                      _showDialog(context);
+                      showSpinner = false;
                     }
                   }),
             ],
